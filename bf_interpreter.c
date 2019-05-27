@@ -53,9 +53,8 @@ int main(int argc, char *argv[])
             RoopPointer = 0;
             zeroclear(rooparr);
         }
-        else{
+        else
             process(chr);
-        }
     }
 
     fclose(fp);
@@ -137,29 +136,17 @@ void scn(){
 
 void process(int chr){
     if (chr == (int)('>'))
-    {
         inc_arr();
-    }
     else if (chr == (int)('<'))
-    {
         dec_arr();
-    }
     else if (chr == (int)('+'))
-    {
         inc();
-    }
     else if (chr == (int)('-'))
-    {
         dec();
-    }
     else if (chr == (int)('.'))
-    {
         dis();
-    }
     else if (chr == (int)(','))
-    {
         scn();
-    }
 }
 
 void roop(){
