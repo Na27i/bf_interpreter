@@ -3,6 +3,15 @@
 
 #define MAX 256
 
+#define GRATER 62   // >
+#define LESS 60     // <
+#define PLUS 43     // +
+#define MINUS 45    // -
+#define PERIOD 46   // .
+#define COMMA 44    // ,
+#define START 91    // [
+#define END 93      // ]
+
 int NowPointer = 0;     //現在の配列番号
 int array[MAX];         //配列
 int rooparr[MAX];       //[]内を格納する配列
@@ -40,12 +49,12 @@ int main(int argc, char *argv[])
 
     while ((chr = fgetc(fp)) != EOF)
     {
-        if (chr == (int)('['))
+        if (chr == START)
         {
             RoopFlag = 1;
             Roop += array[NowPointer];
         }
-        else if (chr == (int)(']'))
+        else if (chr == END)
         {
             RoopFlag = 0;
             roop();
@@ -79,7 +88,7 @@ void inc_arr()
             printf("Array Length over.");
     }
     else{
-        rooparr[RoopPointer] = (int)('>');
+        rooparr[RoopPointer] = GRATER;
         RoopPointer++;
     }
 }
@@ -92,7 +101,7 @@ void dec_arr()
             printf("Array Length over.");
     }
     else{
-        rooparr[RoopPointer] = (int)('<');
+        rooparr[RoopPointer] = LESS;
         RoopPointer ++;
     }
 }
@@ -101,7 +110,7 @@ void inc(){
     if(RoopFlag == 0)
         array[NowPointer]++;
     else{
-        rooparr[RoopPointer] = (int)('+');
+        rooparr[RoopPointer] = PLUS;
         RoopPointer++;
     }
 }
@@ -111,7 +120,7 @@ void dec()
     if (RoopFlag == 0)
         array[NowPointer]--;
     else{
-        rooparr[RoopPointer] = (int)('-');
+        rooparr[RoopPointer] = MINUS;
         RoopPointer++;
     }
 }
@@ -120,7 +129,7 @@ void dis(){
     if (RoopFlag == 0)
         putchar(array[NowPointer]);
     else{
-        rooparr[RoopPointer] = (int)('.');
+        rooparr[RoopPointer] = PERIOD;
         RoopPointer++;
     }
 }
@@ -129,23 +138,23 @@ void scn(){
     if (RoopFlag == 0)
         array[NowPointer] = getchar();
     else{
-        rooparr[RoopPointer] = (int)(',');
+        rooparr[RoopPointer] = COMMA;
         RoopPointer++;
     }
 }
 
 void process(int chr){
-    if (chr == (int)('>'))
+    if (chr == GRATER)
         inc_arr();
-    else if (chr == (int)('<'))
+    else if (chr == LESS)
         dec_arr();
-    else if (chr == (int)('+'))
+    else if (chr == PLUS)
         inc();
-    else if (chr == (int)('-'))
+    else if (chr == MINUS)
         dec();
-    else if (chr == (int)('.'))
+    else if (chr == PERIOD)
         dis();
-    else if (chr == (int)(','))
+    else if (chr == COMMA)
         scn();
 }
 
