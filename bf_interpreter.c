@@ -1,8 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define MAX 256
+//配列の最大要素
+#define ARRMAX 256
+//ループの最大ネスト
+#define NESTMAX 32
+//ソースコードの最大文字数
+#define CODEMAX 10000
 
+//命令群
 #define GRATER 62   // >
 #define LESS 60     // <
 #define PLUS 43     // +
@@ -12,162 +18,140 @@
 #define START 91    // [
 #define END 93      // ]
 
-int NowPointer = 0;     //現在の配列番号
-int array[MAX];         //配列
-int rooparr[MAX];       //[]内を格納する配列
-int Roop = 0;           //[]内の実行回数
-int RoopFlag = 0;       //[]内かどうかの判別用
-int RoopPointer = 0;    //[]用配列の配列番号
-
-void zeroclear(int array[]);    //配列の初期化
-void inc_arr();     //配列のインクリメント(>)
-void dec_arr();     //配列のデクリメント(<)
-void inc();         //要素のインクリメント(+)
-void dec();         //要素のデクリメント(-)
-void dis();         //表示(.)
-void scn();         //読み込み(,)
-void roop();        //ループ処理([ ])
-void process();     //ループ処理以外をまとめた処理
+typedef struct roop
+{
+    int start;
+    int end;
+    int state;
+} roop;
 
 int main(int argc, char *argv[])
 {
     FILE *fp;   //FILE型構造体
-    char filename[MAX];
-    char chr;
 
-    printf("Please input Filename:");
-    scanf("%s", filename);
+    int NowPointer = 0; //現在いる配列の配列番号
+    
+    int Array[ARRMAX] = {0};    //bf内の配列
+    int Code[CODEMAX] = {0};    //ソースコードを格納
+    roop Roop[NESTMAX];
 
-    fp = fopen(filename, "r");
-    if (fp == NULL)
-    {
-        printf("File Load Error.");
+    int i;              //forループで使用
+    int RoopNest = 0;   //ループの深さ
+    int chr;            //fgetcの返り値を格納
+    int len = 0;        //命令の格納に使用
+
+    if(argc == 2){
+        fp = fopen(argv[1], "r");
+        if (fp == NULL){
+            printf("ファイルの読み込みエラー");
+            return -1;
+        }
+    }
+    else{
+        printf("引数エラー");
         return -1;
     }
-
-    zeroclear(array);
-
-    while ((chr = fgetc(fp)) != EOF)
-    {
-        if (chr == START)
-        {
-            RoopFlag = 1;
-            Roop += array[NowPointer];
-        }
-        else if (chr == END)
-        {
-            RoopFlag = 0;
-            roop();
-            Roop = 0;
-            RoopPointer = 0;
-            zeroclear(rooparr);
-        }
-        else
-            process(chr);
-    }
-
-    fclose(fp);
-
-    return 0;
-}
-
-/*関数群*/
-
-void zeroclear(int array[])
-{
-    int i;
-    for (i = 0; i < MAX; i++)
-        array[i] = 0;
-}
-
-void inc_arr()
-{
-    if(RoopFlag == 0){
-        NowPointer++;
-        if (NowPointer >= MAX)
-            printf("Array Length over.");
-    }
-    else{
-        rooparr[RoopPointer] = GRATER;
-        RoopPointer++;
-    }
-}
-
-void dec_arr()
-{
-    if(RoopFlag == 0){
-        NowPointer--;
-        if (NowPointer < 0)
-            printf("Array Length over.");
-    }
-    else{
-        rooparr[RoopPointer] = LESS;
-        RoopPointer ++;
-    }
-}
-
-void inc(){
-    if(RoopFlag == 0)
-        array[NowPointer]++;
-    else{
-        rooparr[RoopPointer] = PLUS;
-        RoopPointer++;
-    }
-}
-
-void dec()
-{
-    if (RoopFlag == 0)
-        array[NowPointer]--;
-    else{
-        rooparr[RoopPointer] = MINUS;
-        RoopPointer++;
-    }
-}
-
-void dis(){
-    if (RoopFlag == 0)
-        putchar(array[NowPointer]);
-    else{
-        rooparr[RoopPointer] = PERIOD;
-        RoopPointer++;
-    }
-}
-
-void scn(){
-    if (RoopFlag == 0)
-        array[NowPointer] = getchar();
-    else{
-        rooparr[RoopPointer] = COMMA;
-        RoopPointer++;
-    }
-}
-
-void process(int chr){
-    if (chr == GRATER)
-        inc_arr();
-    else if (chr == LESS)
-        dec_arr();
-    else if (chr == PLUS)
-        inc();
-    else if (chr == MINUS)
-        dec();
-    else if (chr == PERIOD)
-        dis();
-    else if (chr == COMMA)
-        scn();
-}
-
-void roop(){
-    int i;
-    int j;
-    int chr;
     
-    for(i = 0; i < Roop; i++){
-        for(j = 0; j <= RoopPointer; j++)
-        {
-            chr = rooparr[j];
-            process(chr);
+    while((chr = fgetc(fp)) != EOF)
+    {
+        if(len < CODEMAX){
+            switch(chr){
+                case GRATER:
+                case LESS:
+                case PLUS:
+                case MINUS:
+                case PERIOD:
+                case COMMA:
+                case START:
+                case END:
+                    Code[len] = chr;
+                    len++;
+                    break;
+                default:
+                    break;
+            }
+        }
+        else{
+            printf("ソースコード格納エラー");
+            return -1;
         }
     }
+
+    for(i = 0; i<NESTMAX; i++){
+        Roop[i].start = 0;
+        Roop[i].end = 0;
+        Roop[i].state = 0;
+    }
+
+    i = 0;
+    while(i < len)
+    {
+        switch( Code[i] ){
+            case GRATER:
+                NowPointer++;
+                i++;
+                break;
+            case LESS:
+                NowPointer--;
+                if(NowPointer < 0){
+                    printf("配列の範囲外エラー");
+                    exit(-1);
+                }
+                i++;
+                break;
+            case PLUS:
+                Array[NowPointer]++;
+                i++;
+                break;
+            case MINUS:
+                Array[NowPointer]--;
+                if(Array[NowPointer] < 0){
+                    printf("配列の値エラー");
+                    exit(-1);
+                }
+                i++;
+                break;
+            case PERIOD:
+                printf("%c", Array[NowPointer]);
+      
+                i++;
+                break;
+            case COMMA:
+                scanf("%d", &chr);
+                Array[NowPointer] = chr;
+                i++;
+                break;
+            case START:
+                if(Roop[RoopNest].state == 0){
+                    RoopNest++;
+                    Roop[RoopNest].start = i;
+                    Roop[RoopNest].state = 0;
+                }
+                else if(Roop[RoopNest].state == 1){
+                    Roop[RoopNest].state = 0;
+                }
+
+                if(Array[NowPointer] == 0){
+                    i = Roop[RoopNest].end;
+                    break;
+                }
+                i++;
+                break;
+            case END:
+                if (Array[NowPointer] != 0){
+                    Roop[RoopNest].end = i;
+                    Roop[RoopNest].state = 1;
+                    i = Roop[RoopNest].start;
+                }
+                else{
+                    Roop[RoopNest].start = 0;
+                    Roop[RoopNest].end = 0;
+                    Roop[RoopNest].state = 0;
+                    RoopNest--;
+                    i++;
+                }
+                break;
+        }
+    }
+    return 0;
 }
