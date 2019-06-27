@@ -40,18 +40,34 @@ int main(int argc, char *argv[])
     int chr;            //fgetcの返り値を格納
     int len = 0;        //命令の格納に使用
 
-    if(argc == 2){
+    if(argc == 1){
+        printf("Error : input file.");
+        return -1;
+    }
+    else if(argc > 1){
         fp = fopen(argv[1], "r");
         if (fp == NULL){
-            printf("ファイルの読み込みエラー");
+            printf("Error : file read.");
             return -1;
         }
     }
-    else{
-        printf("引数エラー");
-        return -1;
+
+    if(argc > 2){
+        for(i = 2; i < argc; i++){
+            chr = atoi(argv[i]);
+            Array[i-2] = chr;
+            if(Array[i-2] < 0){
+                printf("Error : commandline arguments.");
+                return -1;
+            }
+        }
+        printf("assigned a value.\n");
+        for(i = 2; i < argc; i++){
+            printf("a[%d] %d\n", i-2, Array[i-2]);
+        }
+        putchar('\n');
     }
-    
+
     while((chr = fgetc(fp)) != EOF)
     {
         if(len < CODEMAX){
@@ -72,7 +88,7 @@ int main(int argc, char *argv[])
             }
         }
         else{
-            printf("ソースコード格納エラー");
+            printf("Error : too long code.");
             return -1;
         }
     }
@@ -94,7 +110,7 @@ int main(int argc, char *argv[])
             case LESS:
                 NowPointer--;
                 if(NowPointer < 0){
-                    printf("配列の範囲外エラー");
+                    printf("Error : range of array.");
                     exit(-1);
                 }
                 i++;
@@ -106,18 +122,17 @@ int main(int argc, char *argv[])
             case MINUS:
                 Array[NowPointer]--;
                 if(Array[NowPointer] < 0){
-                    printf("配列の値エラー");
+                    printf("Error : value of array.");
                     exit(-1);
                 }
                 i++;
                 break;
             case PERIOD:
                 printf("%c", Array[NowPointer]);
-      
                 i++;
                 break;
             case COMMA:
-                scanf("%d", &chr);
+                chr = getchar();
                 Array[NowPointer] = chr;
                 i++;
                 break;
